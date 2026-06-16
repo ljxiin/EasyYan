@@ -1,0 +1,31 @@
+$primary: #1f53ff;
+$primary-soft: #eef3ff;
+$ink: #07164a;
+$text: #18275d;
+$muted: #7280a6;
+$line: #e5eaf7;
+$bg: #f8faff;
+$surface: #ffffff;
+$green: #18b979;
+$orange: #ff9b21;
+$red: #ff5b63;
+$violet: #8e5bff;
+$teal: #2dc6b7;
+
+:root {
+  --primary: #{$primary};
+  --primary-soft: #{$primary-soft};
+  --ink: #{$ink};
+  --text: #{$text};
+  --muted: #{$muted};
+  --line: #{$line};
+  --bg: #{$bg};
+  --surface: #{$surface};
+  --green: #{$green};
+  --orange: #{$orange};
+  --red: #{$red};
+  --violet: #{$violet};
+  --teal: #{$teal};
+  --shadow: 0 12px 32px rgba(49, 66, 112, 0.06);
+  --radius: 8px;
+}

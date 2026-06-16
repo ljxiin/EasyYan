@@ -1,17 +1,54 @@
-# easy_yan
+# 考研数学刷题系统
 
-A new Flutter project.
+基于 Vue 3 + TypeScript + Vite 的考研刷题后台系统原型工程。
 
-## Getting Started
+## 技术栈
 
-This project is a starting point for a Flutter application.
+- Vue 3
+- TypeScript
+- Vite
+- Element Plus
+- ECharts
+- Pinia
+- Vue Router
+- Axios
+- KaTeX
+- PDF.js
 
-A few resources to get you started if this is your first Flutter project:
+## 运行方式
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+当前环境需要先安装 Node.js 18+。
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+npm install
+npm run dev
+```
+
+默认访问：
+
+```text
+http://127.0.0.1:5173
+```
+
+## 已完成
+
+- Vue 工程初始化
+- 基础布局 `BasicLayout`
+- 左侧菜单 `Sidebar`
+- 顶部栏 `AppHeader`
+- 路由配置
+- 首页 `Dashboard` 静态高保真 UI
+- ECharts 图表组件封装
+- 其他核心菜单路由占位
+
+## 后续页面
+
+下一步可继续按原型实现：
+
+- 教材库与上传教材四步流程
+- 习题库与导入题目流程
+- 试卷库与导入试卷流程
+- 刷题列表与刷题详情
+- 统计分析多 Tabs
+- 知识网络图谱
+- 学习计划、笔记管理、设置
