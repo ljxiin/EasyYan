@@ -1,10 +1,23 @@
 <template>
   <header class="header" :class="{ 'practice-header': isPractice }">
     <template v-if="isStatistics">
-      <div class="statistics-subject">
-        <span>刷题科目：</span>
-        <strong>数学（一）</strong>
-        <el-icon><ArrowDown /></el-icon>
+      <div class="statistics-filters">
+        <div class="statistics-filter">
+          <span class="filter-label">考试科目：</span>
+          <el-select v-model="statisticsExam" class="statistics-select exam-select">
+            <el-option label="数学（一）" value="math1" />
+            <el-option label="数学（二）" value="math2" />
+            <el-option label="数学（三）" value="math3" />
+          </el-select>
+        </div>
+        <div class="statistics-filter">
+          <span class="filter-label">刷题科目：</span>
+          <el-select v-model="statisticsSubject" class="statistics-select practice-subject-select" @change="changeStatisticsSubject">
+            <el-option label="高等数学" value="calculus" />
+            <el-option label="线性代数" value="linear-algebra" />
+            <el-option label="概率统计" value="probability" />
+          </el-select>
+        </div>
       </div>
     </template>
     <template v-else-if="isPractice && !isCustomPaper">
@@ -35,12 +48,6 @@
           <el-icon><Calendar /></el-icon>
           <span>2024-04-01&nbsp; ~ &nbsp;2024-05-31</span>
           <el-icon class="close"><Close /></el-icon>
-        </button>
-        <button type="button" class="header-pill">
-          <el-icon><Filter /></el-icon><span>筛选</span>
-        </button>
-        <button type="button" class="header-pill">
-          <el-icon><Setting /></el-icon><span>设置</span>
         </button>
       </template>
       <div v-if="!isPractice && !isCustomPaper" class="search">
@@ -74,13 +81,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowDown, Bell, Calendar, Close, Filter, Message, Search, Setting, Timer, VideoPause } from '@element-plus/icons-vue'
+import { Bell, Calendar, Close, Message, Search, Setting, Timer, VideoPause } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
 const practiceSubject = ref('math1')
+const statisticsExam = ref('math1')
+const statisticsSubject = ref('calculus')
 const isPractice = computed(() => route.path.startsWith('/practice'))
 const isStatistics = computed(() => route.path.startsWith('/statistics'))
 const isCustomPaper = computed(() => Boolean(route.meta.customPaper))
@@ -91,11 +100,26 @@ const practiceMode = computed(() => {
 })
 const title = computed(() => {
   if (route.path.startsWith('/papers/import') && route.query.mode === 'edit') return '试卷库　/　修改试卷'
+  if (route.path.startsWith('/questions/create') && route.query.mode === 'edit') return '习题库 / 编辑习题库'
+  if (route.path.startsWith('/questions/create')) return '习题库 / 新建习题库'
   return route.meta.title || '首页 / 学习概览'
 })
 
+watch(
+  () => route.query.subject,
+  value => {
+    const subject = String(value || 'calculus')
+    statisticsSubject.value = ['calculus', 'linear-algebra', 'probability'].includes(subject) ? subject : 'calculus'
+  },
+  { immediate: true }
+)
+
 function changePracticeMode(value: string) {
   router.push({ name: 'practice', query: { mode: value } })
+}
+
+function changeStatisticsSubject(value: string) {
+  router.replace({ query: { ...route.query, subject: value === 'calculus' ? undefined : value } })
 }
 </script>
 
@@ -121,26 +145,42 @@ function changePracticeMode(value: string) {
   flex: 1;
 }
 
-.statistics-subject {
+.statistics-filters {
   display: flex;
   align-items: center;
-  gap: 12px;
-  width: 230px;
-  height: 42px;
-  padding: 0 14px;
-  color: var(--ink);
-  font-size: 14px;
-  border: 1px solid var(--line);
-  border-radius: 7px;
-}
-
-.statistics-subject strong {
+  gap: 20px;
   flex: 1;
 }
 
-.statistics-subject .el-icon {
-  color: var(--text);
-  font-size: 13px;
+.statistics-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.statistics-select {
+  flex: 0 0 auto;
+}
+
+.exam-select {
+  width: 136px;
+}
+
+.practice-subject-select {
+  width: 132px;
+}
+
+.statistics-select :deep(.el-select__wrapper) {
+  min-height: 40px;
+  padding: 0 13px;
+  border-radius: 7px;
+  box-shadow: 0 0 0 1px var(--line) inset;
+}
+
+.statistics-select :deep(.el-select__selected-item) {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .filter-label {
@@ -225,6 +265,7 @@ h1 {
   display: flex;
   align-items: center;
   gap: 18px;
+  margin-left: auto;
 }
 
 .search {
@@ -240,12 +281,12 @@ h1 {
   border-radius: 20px;
 }
 
-.statistics-subject + h1,
-.header:has(.statistics-subject) h1 {
+.statistics-filters + h1,
+.header:has(.statistics-filters) h1 {
   display: none;
 }
 
-.header:has(.statistics-subject) .search {
+.header:has(.statistics-filters) .search {
   display: none;
 }
 

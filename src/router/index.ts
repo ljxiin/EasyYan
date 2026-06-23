@@ -61,25 +61,25 @@ const children: RouteRecordRaw[] = [
     path: 'questions/create',
     name: 'questionLibraryCreate',
     component: QuestionImport,
-    meta: { title: '习题库 / 新建习题库', step: 1, flow: 'library' }
+    meta: { title: '习题库 / 新建或编辑习题库', step: 1, flow: 'library' }
   },
   {
     path: 'questions/create/parse',
     name: 'questionLibraryCreateParse',
     component: QuestionImport,
-    meta: { title: '习题库 / 新建习题库', step: 2, flow: 'library' }
+    meta: { title: '习题库 / 新建或编辑习题库', step: 2, flow: 'library' }
   },
   {
     path: 'questions/create/settings',
     name: 'questionLibraryCreateSettings',
     component: QuestionImport,
-    meta: { title: '习题库 / 新建习题库', step: 3, flow: 'library' }
+    meta: { title: '习题库 / 新建或编辑习题库', step: 3, flow: 'library' }
   },
   {
     path: 'questions/create/confirm',
     name: 'questionLibraryCreateConfirm',
     component: QuestionImport,
-    meta: { title: '习题库 / 新建习题库', step: 4, flow: 'library' }
+    meta: { title: '习题库 / 新建或编辑习题库', step: 4, flow: 'library' }
   },
   { path: 'papers', name: 'papers', component: PaperLibrary, meta: { title: '试卷库' } },
   { path: 'papers/import', name: 'paperImport', component: PaperImport, meta: { title: '试卷库　/　导入试卷', step: 1 } },

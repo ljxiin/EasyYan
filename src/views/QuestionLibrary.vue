@@ -81,15 +81,9 @@
         </div>
         <span>{{ item.createdAt }}</span>
         <div class="actions">
-          <button type="button" class="icon-action" title="详情" @click="goDetail(item.id)">
-            <el-icon><FolderOpened /></el-icon>
-          </button>
-          <button type="button" class="icon-action" title="编辑" @click="editLibrary(item.name)">
-            <el-icon><EditPen /></el-icon>
-          </button>
-          <button type="button" class="icon-action danger-action" title="删除" @click="deleteLibrary(item.name)">
-            <el-icon><Delete /></el-icon>
-          </button>
+          <button type="button" class="text-action detail-action" @click="goDetail(item.id)">详情</button>
+          <button type="button" class="text-action edit-action" @click="editLibrary(item)">编辑</button>
+          <button type="button" class="text-action delete-action" @click="deleteLibrary(item)">删除</button>
         </div>
       </article>
 
@@ -108,12 +102,14 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
-import { ElMessage } from 'element-plus'
-import { Delete, EditPen, FolderOpened, Plus, Search } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus, Search } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 import { questionStats } from '@/mock/questions'
+import { useQuestionLibraryStore, type QuestionLibrary } from '@/stores/questionLibrary'
 
 const router = useRouter()
+const libraryStore = useQuestionLibraryStore()
 const keyword = ref('')
 const filters = reactive({
   subject: '',
@@ -123,104 +119,7 @@ const filters = reactive({
 })
 
 const statSymbols = ['Σ', '◆', '✓', '★', '!']
-const libraries = ref([
-  {
-    id: 1,
-    name: '高等数学习题全解（同济第七版）',
-    author: '同济大学数学系 编',
-    subject: '高等数学',
-    source: '教材配套',
-    questionCount: 2856,
-    pointCount: 98,
-    difficulty: '中等',
-    difficultyType: 'warning',
-    tags: ['同济版', '基础题', '同步练习', '考研'],
-    createdAt: '2024-05-12 10:23',
-    mode: '同步练习',
-    tone: 'blue',
-    coverTitle: '高等数学'
-  },
-  {
-    id: 2,
-    name: '线性代数习题精选',
-    author: '李永乐 编',
-    subject: '线性代数',
-    source: '教辅资料',
-    questionCount: 1256,
-    pointCount: 68,
-    difficulty: '中等',
-    difficultyType: 'warning',
-    tags: ['考研', '真题', '专题训练'],
-    createdAt: '2024-05-10 15:30',
-    mode: '专题训练',
-    tone: 'green',
-    coverTitle: '线性代数'
-  },
-  {
-    id: 3,
-    name: '概率论与数理统计习题集',
-    author: '盛骤 谢式千 潘承毅 编',
-    subject: '概率论与数理统计',
-    source: '教材配套',
-    questionCount: 1852,
-    pointCount: 72,
-    difficulty: '中等',
-    difficultyType: 'warning',
-    tags: ['浙大版', '基础题', '同步练习', '概率'],
-    createdAt: '2024-05-08 09:15',
-    mode: '同步练习',
-    tone: 'purple',
-    coverTitle: '概率统计'
-  },
-  {
-    id: 4,
-    name: '数学分析习题精讲精练',
-    author: '华东师范大学数学系 编',
-    subject: '数学分析',
-    source: '教辅资料',
-    questionCount: 2136,
-    pointCount: 85,
-    difficulty: '困难',
-    difficultyType: 'danger',
-    tags: ['考研', '提高题', '专题训练'],
-    createdAt: '2024-04-28 11:20',
-    mode: '专题训练',
-    tone: 'orange',
-    coverTitle: '数学分析'
-  },
-  {
-    id: 5,
-    name: '高等代数习题精解',
-    author: '吴赣昌 编',
-    subject: '高等代数',
-    source: '教材配套',
-    questionCount: 1048,
-    pointCount: 45,
-    difficulty: '简单',
-    difficultyType: 'success',
-    tags: ['北大版', '基础题'],
-    createdAt: '2024-04-20 16:40',
-    mode: '同步练习',
-    tone: 'teal',
-    coverTitle: '高等代数'
-  },
-  {
-    id: 6,
-    name: '历年考研数学真题分类汇编（数学一）',
-    author: '张宇 编',
-    subject: '高等数学',
-    source: '真题汇编',
-    questionCount: 3420,
-    pointCount: 120,
-    difficulty: '困难',
-    difficultyType: 'danger',
-    tags: ['真题', '考研', '分类训练', '数学一'],
-    createdAt: '2024-04-15 20:18',
-    mode: '真题汇编',
-    tone: 'blue',
-    coverTitle: '真题汇编'
-  }
-])
+const libraries = computed(() => libraryStore.libraries)
 
 const tagOptions = computed(() => Array.from(new Set(libraries.value.flatMap((item) => item.tags))))
 
@@ -253,15 +152,28 @@ function goDetail(id: number) {
 }
 
 function createLibrary() {
+  libraryStore.startCreate()
   router.push({ name: 'questionLibraryCreate' })
 }
 
-function editLibrary(name: string) {
-  ElMessage.info(`编辑：${name}`)
+function editLibrary(item: QuestionLibrary) {
+  libraryStore.startEdit(item)
+  router.push({ name: 'questionLibraryCreate', query: { mode: 'edit', libraryId: item.id } })
 }
 
-function deleteLibrary(name: string) {
-  ElMessage.warning(`删除：${name}`)
+async function deleteLibrary(item: QuestionLibrary) {
+  try {
+    await ElMessageBox.confirm(`确认删除习题库“${item.name}”吗？删除后不可恢复。`, '删除习题库', {
+      confirmButtonText: '确认删除',
+      cancelButtonText: '取消',
+      type: 'warning',
+      confirmButtonClass: 'el-button--danger'
+    })
+    libraryStore.remove(item.id)
+    ElMessage.success('习题库已删除')
+  } catch {
+    ElMessage.info('已取消删除')
+  }
 }
 </script>
 
@@ -486,33 +398,64 @@ function deleteLibrary(name: string) {
 }
 
 .actions {
-  gap: 10px;
-  color: #65729c;
-  font-size: 18px;
+  gap: 5px;
+  min-width: 0;
+  font-size: 12px;
 }
 
-.icon-action {
+.text-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  color: #65729c;
+  min-width: 38px;
+  height: 27px;
+  padding: 0 5px;
   background: transparent;
-  border: 0;
-  border-radius: 6px;
-  transition: 0.16s ease;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
 }
 
-.icon-action:hover {
-  color: var(--primary);
-  background: var(--primary-soft);
+.detail-action {
+  color: #1f53ff;
+  background: #f5f7ff;
 }
 
-.danger-action:hover {
-  color: var(--red);
-  background: rgba(255, 91, 99, 0.1);
+.edit-action {
+  color: #18a66f;
+  background: #f2fbf7;
+}
+
+.delete-action {
+  color: #ef4d5d;
+  background: #fff6f7;
+}
+
+.text-action:hover {
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(31, 45, 90, 0.12);
+  transform: translateY(-1px);
+}
+
+.detail-action:hover {
+  background: #1f53ff;
+}
+
+.edit-action:hover {
+  background: #18a66f;
+}
+
+.delete-action:hover {
+  background: #ef4d5d;
+}
+
+.text-action:active {
+  box-shadow: none;
+  transform: translateY(0);
 }
 
 .table-footer {

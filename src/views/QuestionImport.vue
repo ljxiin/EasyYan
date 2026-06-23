@@ -46,9 +46,9 @@
               @change="handleFileChange"
             />
             <el-icon class="upload-folder"><FolderAdd /></el-icon>
-            <template v-if="selectedFile">
-              <strong>{{ selectedFile.name }}</strong>
-              <p>{{ formatFileSize(selectedFile.size) }} · 文件已选择</p>
+            <template v-if="selectedFile || existingFileName">
+              <strong>{{ selectedFile?.name || existingFileName }}</strong>
+              <p>{{ selectedFile ? formatFileSize(selectedFile.size) : '原习题库文件' }} · 文件已选择</p>
               <div class="file-actions">
                 <el-button type="primary" @click.stop="openFilePicker">重新选择</el-button>
                 <el-button @click.stop="clearSelectedFile">移除文件</el-button>
@@ -106,10 +106,12 @@
         </aside>
       </div>
       <div class="footer-actions">
-        <el-button @click="go(isLibraryFlow ? '/questions' : '/questions/detail')">取消</el-button>
+        <el-button @click="go(isLibraryFlow ? '/questions' : '/questions/detail')">
+          {{ isEditingLibrary ? '取消编辑' : '取消' }}
+        </el-button>
         <el-button
           type="primary"
-          :disabled="importMode === 'file' ? !selectedFile : !pastedQuestionText.trim()"
+          :disabled="importMode === 'file' ? !selectedFile && !existingFileName : !pastedQuestionText.trim()"
           @click="go(stepPaths.parse)"
         >
           下一步
@@ -479,10 +481,10 @@
         <el-button @click="go(stepPaths.settings)">上一步：分类与设置</el-button>
         <div></div>
         <el-button @click="go(isLibraryFlow ? '/questions' : '/questions/detail')">
-          {{ isLibraryFlow ? '取消创建' : '取消导入' }}
+          {{ isEditingLibrary ? '取消编辑' : isLibraryFlow ? '取消创建' : '取消导入' }}
         </el-button>
         <el-button type="primary" @click="finishFlow">
-          {{ isLibraryFlow ? '确认创建' : '确认导入' }}
+          {{ isEditingLibrary ? '保存修改' : isLibraryFlow ? '确认创建' : '确认导入' }}
         </el-button>
       </div>
     </template>
@@ -518,6 +520,7 @@ import {
 } from '@element-plus/icons-vue'
 import EChart from '@/components/EChart.vue'
 import { parseQuestions, typePieOption } from '@/mock/questions'
+import { useQuestionLibraryStore } from '@/stores/questionLibrary'
 
 type ParseStatus = '' | '解析成功' | '待检查' | '解析失败'
 type ParseQuestion = {
@@ -536,8 +539,21 @@ type ParseQuestion = {
 
 const route = useRoute()
 const router = useRouter()
+const libraryStore = useQuestionLibraryStore()
+const requestedLibraryId = Number(route.query.libraryId)
+if (route.query.mode === 'edit' && Number.isFinite(requestedLibraryId) && libraryStore.editingId !== requestedLibraryId) {
+  const requestedLibrary = libraryStore.libraries.find((item) => item.id === requestedLibraryId)
+  if (requestedLibrary) libraryStore.startEdit(requestedLibrary)
+}
 const currentStep = computed(() => Number(route.meta.step || 1))
 const isLibraryFlow = computed(() => route.meta.flow === 'library')
+const isEditingLibrary = computed(() => isLibraryFlow.value && libraryStore.mode === 'edit')
+const existingFileName = computed(() => (isEditingLibrary.value ? libraryStore.fileName : ''))
+const flowQuery = computed(() =>
+  isEditingLibrary.value && libraryStore.editingId !== null
+    ? { mode: 'edit', libraryId: String(libraryStore.editingId) }
+    : {}
+)
 const stepPaths = computed(() => {
   const base = isLibraryFlow.value ? '/questions/create' : '/questions/import'
   return {
@@ -549,7 +565,7 @@ const stepPaths = computed(() => {
 })
 
 function go(path: string) {
-  router.push(path)
+  router.push({ path, query: path.startsWith('/questions/create') ? flowQuery.value : {} })
 }
 
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -669,6 +685,7 @@ function selectFile(file: File) {
 
 function clearSelectedFile() {
   selectedFile.value = null
+  if (isEditingLibrary.value) libraryStore.fileName = ''
   resetFileInput()
 }
 
@@ -849,20 +866,13 @@ const steps = computed(() => [
 ])
 
 const libraryTagOptions = ['考研', '基础题', '同步练习', '专题训练', '真题', '提高题']
-const libraryForm = reactive({
-  name: '高等数学习题集',
-  subject: '高等数学',
-  source: '自建题库',
-  difficulty: '中等',
-  visibility: '私有（仅自己可见）',
-  tags: ['考研', '同步练习'],
-  description: '面向考研数学复习的高等数学习题库，包含题目、答案与详细解析。',
-  deduplicate: true,
-  keepAnalysis: true
-})
+const libraryForm = libraryStore.form
 
 function finishFlow() {
-  ElMessage.success(isLibraryFlow.value ? '习题库创建成功' : '题目导入成功')
+  if (isLibraryFlow.value) {
+    libraryStore.save(selectedFile.value?.name)
+  }
+  ElMessage.success(isEditingLibrary.value ? '习题库修改已保存' : isLibraryFlow.value ? '习题库创建成功' : '题目导入成功')
   router.push(isLibraryFlow.value ? '/questions' : '/questions/detail')
 }
 
