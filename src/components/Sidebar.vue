@@ -21,17 +21,23 @@
     <div class="study-card panel">
       <p class="study-title">学习概况</p>
       <div class="study-metric">
-        <span>累计学习</span>
-        <strong>128</strong><em>天</em>
+        <span>今日刷题</span>
+        <strong>36</strong><em>题</em>
       </div>
       <div class="study-row">
         <div>
-          <span>连续学习</span>
-          <strong>15</strong><em>天</em>
+          <span>正确率</span>
+          <strong>72%</strong>
+        </div>
+      </div>
+      <div class="study-row compact-row">
+        <div>
+          <span>累计刷题</span>
+          <strong>856</strong><em>题</em>
         </div>
         <div>
-          <span>今日学习</span>
-          <strong>68</strong><em>分钟</em>
+          <span>累计用时</span>
+          <strong>38.6</strong><em>小时</em>
         </div>
       </div>
       <el-button type="primary" class="checkin" :icon="Calendar">打卡学习</el-button>
@@ -59,7 +65,7 @@ function isActive(path: string) {
 .sidebar {
   position: sticky;
   top: 0;
-  width: 238px;
+  width: 228px;
   height: 100vh;
   padding: 18px 16px;
   background: var(--surface);
@@ -72,7 +78,8 @@ function isActive(path: string) {
   gap: 12px;
   height: 36px;
   color: var(--ink);
-  font-size: 18px;
+  font-size: 17px;
+  white-space: nowrap;
 }
 
 .brand-mark {
@@ -92,15 +99,15 @@ function isActive(path: string) {
 .nav {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-top: 28px;
+  gap: 1px;
+  margin-top: 27px;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
   gap: 13px;
-  height: 46px;
+  height: 44px;
   padding: 0 10px;
   color: var(--text);
   font-size: 16px;
@@ -125,7 +132,7 @@ function isActive(path: string) {
   right: 16px;
   bottom: 18px;
   left: 16px;
-  padding: 16px;
+  padding: 16px 18px;
 }
 
 .study-title {
@@ -138,6 +145,11 @@ function isActive(path: string) {
 .study-row {
   padding-bottom: 14px;
   border-bottom: 1px solid var(--line);
+}
+
+.compact-row {
+  padding-bottom: 0;
+  border-bottom: 0;
 }
 
 .study-row {
@@ -159,7 +171,7 @@ function isActive(path: string) {
   display: inline-block;
   margin-top: 7px;
   color: var(--ink);
-  font-size: 22px;
+  font-size: 18px;
 }
 
 .study-metric em,

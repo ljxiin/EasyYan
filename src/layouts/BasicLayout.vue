@@ -1,9 +1,9 @@
 <template>
-  <div class="layout">
+  <div class="layout" :class="{ 'practice-layout': isPractice }">
     <Sidebar />
     <div class="layout-main">
       <AppHeader />
-      <main class="content">
+      <main class="content" :class="{ 'practice-content': isPractice, 'statistics-content': isStatistics }">
         <RouterView />
       </main>
     </div>
@@ -11,8 +11,14 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import AppHeader from '@/components/AppHeader.vue'
 import Sidebar from '@/components/Sidebar.vue'
+
+const route = useRoute()
+const isPractice = computed(() => route.path.startsWith('/practice'))
+const isStatistics = computed(() => route.path.startsWith('/statistics'))
 </script>
 
 <style scoped lang="scss">
@@ -32,5 +38,15 @@ import Sidebar from '@/components/Sidebar.vue'
   max-width: 1560px;
   margin: 0 auto;
   padding: 22px 28px 30px;
+}
+
+.practice-content {
+  max-width: none;
+  padding: 14px 24px 26px;
+}
+
+.statistics-content {
+  max-width: none;
+  padding: 18px 28px 24px;
 }
 </style>
